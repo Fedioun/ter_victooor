@@ -19,9 +19,11 @@ def main():
 
 	patients_dict = get_metadata(os.path.join(input_folder, "survival_data.csv"))
 
-	for p in patients:
-		load_patient(os.path.join(dataset_folder, p))
+	x1, y1 = load_patient(os.path.join(dataset_folder, patients[0]))
 
+	x2, y2 = load_patient(os.path.join(dataset_folder, patients[1]))
+
+	print( get_IoU(y1, y2, 1) )
 
 	exit()
 
@@ -47,9 +49,9 @@ def load_patient(path):
 
 	return x, y
 
-def get_metadata(csv_path):
 
-	csv_path = os.path.join(input_folder, "survival_data.csv")
+
+def get_metadata(csv_path):
 	patients_dict = {}
 
 	with open(csv_path) as csv_file:
@@ -64,6 +66,50 @@ def get_metadata(csv_path):
 			patients_dict[line[0]] = dt
 
 	return patients_dict
+
+
+
+def get_IoU(x, y, label):
+
+	x = np.where(x == label, True, False)
+	y = np.where(y == label, True, False)
+
+	print(x.shape)
+
+	print(x.sum())
+
+	overlap = x * y  # Logical AND
+	union = x + y    # Logical OR
+
+	return overlap.sum()/float(union.sum())
+
+
+def get_DSC(x, y, label):
+	x = np.where(x == label, True, False)
+	y = np.where(y == label, True, False)
+
+	overlap = x * y
+
+	return 2 * overlap.sum() / (x.sum() + y.sum())
+
+
+def get_metrics(x, y, label):
+	x = np.where(x == label, True, False)
+	y = np.where(y == label, True, False)
+
+	tp = x * y
+	tn = np.logical_not(x) * np.logical_not(y)
+
+
+
+	sensitivity = overlap.sum() / x.sum()
+	specificity = 12
+
+
+
+
+
+
 
 
 
