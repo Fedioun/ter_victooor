@@ -1,30 +1,57 @@
 import zipfile
 import nibabel as nib
 import time, os
+import matplotlib.pyplot as plt
+import numpy as np
 
 def main():
 
 	input_folder = os.path.join(".", "data", "MICCAI_BraTS_2018_Data_Training")
 
-	subfolder = "HGG"
+	data_type = "HGG"
+	dataset_folder = os.path.join(input_folder, data_type)
+	patients = os.listdir(dataset_folder)
 
-	stuff = os.listdir(os.path.join(input_folder, subfolder))
+	
 
+	for p in patients:
+		load_patient(os.path.join(dataset_folder, p))
 
-	for f in stuff:
-		for k in os.listdir(os.path.join(input_folder, subfolder, f)):
-
-			if k.endswith("nii.gz"):
-
-				print(k)
-
-				filename = os.path.join(input_folder, subfolder, f, k)
-
-				img = nib.load(filename)
-				img.shape
+	exit()
 
 
-				time.sleep(1)
+	print(img.shape)
+	print(plt.imshow(img[:, :, 100]) ) 
+
+	plt.show()
+
+	time.sleep(3)
+
+
+def load_patient(path):
+
+	y = nib.load(os.path.join(path, os.path.basename(path) + "_seg.nii.gz")).get_fdata()
+
+
+	channels = ["t1", "t1ce", "t2", "flair"]
+
+	tmp = []
+
+	for c in channels:
+
+		tmp.append(
+			nib.load(os.path.join(path, os.path.basename(path) + "_" + c + ".nii.gz")).get_fdata()
+		)
+
+	x = np.stack(tmp, axis=3)
+
+	return x, y
+
+def get_metadata(id, csv_path):
+	pass
+
+
+
 
 
 main()
