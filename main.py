@@ -23,7 +23,7 @@ def main():
 
 	x2, y2 = load_patient(os.path.join(dataset_folder, patients[1]))
 
-	print( get_IoU(y1, y2, 1) )
+	print(get_metrics(y1, y2, 1) )
 
 	exit()
 
@@ -67,50 +67,33 @@ def get_metadata(csv_path):
 
 	return patients_dict
 
-
-
-def get_IoU(x, y, label):
-
-	x = np.where(x == label, True, False)
-	y = np.where(y == label, True, False)
-
-	print(x.shape)
-
-	print(x.sum())
-
-	overlap = x * y  # Logical AND
-	union = x + y    # Logical OR
-
-	return overlap.sum()/float(union.sum())
-
-
-def get_DSC(x, y, label):
-	x = np.where(x == label, True, False)
-	y = np.where(y == label, True, False)
-
-	overlap = x * y
-
-	return 2 * overlap.sum() / (x.sum() + y.sum())
-
-
 def get_metrics(x, y, label):
 	x = np.where(x == label, True, False)
 	y = np.where(y == label, True, False)
 
-	tp = x * y
-	tn = np.logical_not(x) * np.logical_not(y)
+	
+	tn = (np.logical_not(x) * np.logical_not(y)).sum()
+	tp = (x * y).sum()
+
+	p = y.sum()
+	n = np.logical_not(y).sum()
 
 
+	fp = (x * np.logical_not(y)).sum()
+	fn = (np.logical_not(x) * y).sum()
 
-	sensitivity = overlap.sum() / x.sum()
-	specificity = 12
+	
+	union = (x + y).sum() # logical or
 
+	iou = tp / union
 
+	dsc =  2 * tp / (x.sum() + p)
 
+	acc = (tp + tn) / (p + n)
 
+	f1 = (2 * tp) / (2 * tp +fp + fn) 
 
-
-
+	return iou, dsc, acc, f1
 
 
 
