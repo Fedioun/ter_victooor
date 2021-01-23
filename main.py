@@ -2,11 +2,12 @@ import zipfile
 import nibabel as nib
 import time, os
 import matplotlib.pyplot as plt
+import matplotlib
 import numpy as np
 import csv
 
 def main():
-
+	matplotlib.use('agg')
 	input_folder = os.path.join(".", "data", "MICCAI_BraTS_2018_Data_Training")
 
 	data_type = "HGG"
@@ -23,15 +24,15 @@ def main():
 
 	x2, y2 = load_patient(os.path.join(dataset_folder, patients[1]))
 
-	print(get_metrics(y1, y2, 1) )
-
-	exit()
+	print(get_metrics(y1[:, :, 100], y1[:, :, 99], 1) )
 
 
-	print(img.shape)
-	print(plt.imshow(img[:, :, 100]) ) 
-
-	plt.show()
+	plt.imshow(y1[:, :, 100])
+	plt.colorbar()
+	plt.savefig('foo.png')
+	plt.imshow(y1[:, :, 99])
+	plt.colorbar()
+	plt.savefig('bar.png')
 
 	time.sleep(3)
 
@@ -47,7 +48,13 @@ def load_patient(path):
 
 	x = np.stack(tmp, axis=3)
 
-	return x, y
+
+	patches = []
+	for h in np.array_split(x, 48):
+		for w in np.array_split(h, 48, 1):
+			patches.extend(np.array_split(w, 31, 2))
+
+	return patches
 
 
 
@@ -92,8 +99,12 @@ def get_metrics(x, y, label):
 	acc = (tp + tn) / (p + n)
 
 	f1 = (2 * tp) / (2 * tp +fp + fn) 
+	sensitivity = tp/p
 
-	return iou, dsc, acc, f1
+	ppv = tp / x.sum()
+
+	return iou, dsc, acc, f1, sensitivity, ppv
+
 
 
 
